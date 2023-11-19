@@ -1,6 +1,10 @@
 # gpt-assistants-api-ui
 
 
+* OpenAI Assistants API chat UI
+* It works easily by setting the ASSISTANT ID
+* Supports file upload and file download
+
 ## Quick Start
 
 1. Install dependencies

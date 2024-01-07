@@ -31,3 +31,5 @@ ASSISTANT_ID=asst_xxx
 ```
 $ streamlit run streamlit_app.py
 ```
+
+Or you can fork this repository and deploy it to https://share.streamlit.io/ setting the environment variables in "Secrets" tab.

@@ -1,4 +1,4 @@
-# gpt-assistants-api-ui
+# gpt-assistants-api-streamlit
 
 
 * OpenAI Assistants API chat UI
@@ -21,9 +21,13 @@ $ poetry install
 
 2. Set environment variables `OPENAI_API_KEY`, `ASSISTANT_ID`
 
+```
+OPENAI_API_KEY=sk-xxx
+ASSISTANT_ID=asst_xxx
+```
 
 3. Run the app
 
 ```
-$ streamlit run app.py
+$ streamlit run streamlit_app.py
 ```

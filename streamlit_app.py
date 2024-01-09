@@ -140,7 +140,7 @@ def disable_form():
 
 
 def main():
-    st.title("Assistants API UI")
+    st.title(assistant_title)
     user_msg = st.chat_input(
         "Message", on_submit=disable_form, disabled=st.session_state.in_progress
     )

@@ -14,6 +14,8 @@ api_key = os.environ.get("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=api_key)
 assistant_id = os.environ.get("ASSISTANT_ID")
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
+assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
+upload_file_feature_enabled = os.environ.get("UPLOAD_FILE_FEATURE_ENABLED", False)
 
 
 def create_thread(content, file):
@@ -142,22 +144,25 @@ def main():
     user_msg = st.chat_input(
         "Message", on_submit=disable_form, disabled=st.session_state.in_progress
     )
-    uploaded_file = st.sidebar.file_uploader(
-        "Upload a file",
-        type=[
-            "txt",
-            "pdf",
-            "png",
-            "jpg",
-            "jpeg",
-            "csv",
-            "json",
-            "geojson",
-            "xlsx",
-            "xls",
-        ],
-        disabled=st.session_state.in_progress,
-    )
+    if upload_file_feature_enabled:
+        uploaded_file = st.sidebar.file_uploader(
+            "Upload a file",
+            type=[
+                "txt",
+                "pdf",
+                "png",
+                "jpg",
+                "jpeg",
+                "csv",
+                "json",
+                "geojson",
+                "xlsx",
+                "xls",
+            ],
+            disabled=st.session_state.in_progress,
+        )
+    else:
+        uploaded_file = None
     if user_msg:
         render_chat()
         with st.chat_message("user"):

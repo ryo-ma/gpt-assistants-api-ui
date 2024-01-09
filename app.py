@@ -1,15 +1,15 @@
 import os
 import time
-import glob
 import base64
 import re
+import json
 
 import streamlit as st
 import openai
 from openai.types.beta.threads import MessageContentImageFile
+from tools import TOOL_MAP
 
 
-# OpenAI APIキーの設定
 api_key = os.environ.get("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=api_key)
 assistant_id = os.environ.get("ASSISTANT_ID")
@@ -100,7 +100,7 @@ def get_message_list(thread, run):
         if run.status == "completed":
             completed = True
         else:
-            time.sleep(5)
+            time.sleep(1)
 
     messages = client.beta.threads.messages.list(thread_id=thread.id)
     return get_message_value_list(messages)
@@ -112,7 +112,77 @@ def get_response(user_input, file):
     else:
         create_message(st.session_state.thread, user_input, file)
     run = create_run(st.session_state.thread)
+    run = client.beta.threads.runs.retrieve(
+        thread_id=st.session_state.thread.id, run_id=run.id
+    )
+
+    while run.status == "in_progress":
+        print("run.status:", run.status)
+
+        time.sleep(1)
+        run = client.beta.threads.runs.retrieve(
+            thread_id=st.session_state.thread.id, run_id=run.id
+        )
+        run_steps = client.beta.threads.runs.steps.list(
+            thread_id=st.session_state.thread.id, run_id=run.id
+        )
+        print("run_steps:", run_steps)
+        for step in run_steps.data:
+            if hasattr(step.step_details, "tool_calls"):
+                for tool_call in step.step_details.tool_calls:
+                    if (
+                        hasattr(tool_call, "code_interpreter")
+                        and tool_call.code_interpreter.input != ""
+                    ):
+                        input_code = f"### code interpreter\ninput:\n```python\n{tool_call.code_interpreter.input}\n```"
+                        print(input_code)
+                        if (
+                            st.session_state.tool_call is None
+                            or st.session_state.tool_call.id != tool_call.id
+                        ):
+                            st.session_state.tool_call = tool_call
+                            with st.chat_message("Assistant"):
+                                st.markdown(
+                                    input_code,
+                                    True,
+                                )
+                                st.session_state.chat_log.append(
+                                    {
+                                        "name": "assistant",
+                                        "msg": input_code,
+                                    }
+                                )
+
+    if run.status == "requires_action":
+        print("run.status:", run.status)
+        run = execute_action(run, st.session_state.thread)
+
     return "\n".join(get_message_list(st.session_state.thread, run))
+
+
+def execute_action(run, thread):
+    tool_outputs = []
+    for tool_call in run.required_action.submit_tool_outputs.tool_calls:
+        tool_id = tool_call.id
+        tool_function_name = tool_call.function.name
+        print(tool_call.function.arguments)
+
+        tool_function_arguments = json.loads(tool_call.function.arguments)
+
+        print("id:", tool_id)
+        print("name:", tool_function_name)
+        print("arguments:", tool_function_arguments)
+
+        tool_function_output = TOOL_MAP[tool_function_name](**tool_function_arguments)
+        print("tool_function_output", tool_function_output)
+        tool_outputs.append({"tool_call_id": tool_id, "output": tool_function_output})
+
+    run = client.beta.threads.runs.submit_tool_outputs(
+        thread_id=thread.id,
+        run_id=run.id,
+        tool_outputs=tool_outputs,
+    )
+    return run
 
 
 def handle_uploaded_file(uploaded_file):
@@ -125,6 +195,9 @@ def render_chat():
         with st.chat_message(chat["name"]):
             st.markdown(chat["msg"], True)
 
+
+if "tool_call" not in st.session_state:
+    st.session_state.tool_call = None
 
 if "chat_log" not in st.session_state:
     st.session_state.chat_log = []
@@ -162,16 +235,18 @@ def main():
         render_chat()
         with st.chat_message("user"):
             st.markdown(user_msg, True)
+        st.session_state.chat_log.append({"name": "user", "msg": user_msg})
         file = None
         if uploaded_file is not None:
             file = handle_uploaded_file(uploaded_file)
-        response = get_response(user_msg, file)
+        with st.spinner("Wait for response..."):
+            response = get_response(user_msg, file)
         with st.chat_message("Assistant"):
             st.markdown(response, True)
 
-        st.session_state.chat_log.append({"name": "user", "msg": user_msg})
         st.session_state.chat_log.append({"name": "assistant", "msg": response})
         st.session_state.in_progress = False
+        st.session_state.tool_call = None
         st.rerun()
     render_chat()
 

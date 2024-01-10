@@ -4,12 +4,7 @@
 * 🛠️ It works easily by setting the ASSISTANT ID
 * 📁 Supports file upload and file download
 
-![UI Screenshot](https://github.com/ryo-ma/gpt-assistants-api-ui/assets/6661165/5c288d51-196a-4919-bc4d-dc508146f58a)
-
-### 🌐 Deploy to Streamlit Cloud
-You can fork this repository and deploy the app to https://share.streamlit.io/. No need to run the app on your local machine.
-
-> Don't forget to choose 3.10 as the Python version and set environment variables in the "Advanced settings" during deployment.
+<img width="1459" alt="スクリーンショット 2023-11-20 2 23 51" src="https://github.com/ryo-ma/gpt-assistants-api-ui/assets/6661165/5c288d51-196a-4919-bc4d-dc508146f58a">
 
 ## 🌟 Quick Start
 
@@ -35,3 +30,8 @@ You can fork this repository and deploy the app to https://share.streamlit.io/. 
     $ poetry shell
     $ streamlit run app.py
     ```
+
+## 🌐 Deploy to Streamlit Cloud
+You can fork this repository and deploy the app to https://share.streamlit.io/. No need to run the app on your local machine.
+
+> Don't forget to choose 3.10 as the Python version and set environment variables in the "Advanced settings" during deployment.

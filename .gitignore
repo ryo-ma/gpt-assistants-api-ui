@@ -3,3 +3,5 @@
 files/*
 !files/.gitkeep
 __pycache__
+/.idea
+.python-version

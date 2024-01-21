@@ -33,11 +33,11 @@ def create_thread(content, file):
 
 def create_message(thread, content, file):
     file_ids = []
+    if file is not None:
+        file_ids.append(file.id)
     client.beta.threads.messages.create(
         thread_id=thread.id, role="user", content=content, file_ids=file_ids
     )
-    if file is not None:
-        file_ids.append(file.id)
 
 
 def create_run(thread):
@@ -101,6 +101,8 @@ def get_message_list(thread, run):
         print("messages:", "\n".join(get_message_value_list(messages)))
         if run.status == "completed":
             completed = True
+        elif run.status == "failed":
+            break
         else:
             time.sleep(1)
 
@@ -139,10 +141,10 @@ def get_response(user_input, file):
                         input_code = f"### code interpreter\ninput:\n```python\n{tool_call.code_interpreter.input}\n```"
                         print(input_code)
                         if (
-                            st.session_state.tool_call is None
-                            or st.session_state.tool_call.id != tool_call.id
+                            len(st.session_state.tool_calls) == 0
+                            or tool_call.id not in [x.id for x in st.session_state.tool_calls]
                         ):
-                            st.session_state.tool_call = tool_call
+                            st.session_state.tool_calls.append(tool_call)
                             with st.chat_message("Assistant"):
                                 st.markdown(
                                     input_code,
@@ -199,7 +201,7 @@ def render_chat():
 
 
 if "tool_call" not in st.session_state:
-    st.session_state.tool_call = None
+    st.session_state.tool_calls = []
 
 if "chat_log" not in st.session_state:
     st.session_state.chat_log = []

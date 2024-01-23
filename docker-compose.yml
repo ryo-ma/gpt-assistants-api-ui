@@ -5,7 +5,5 @@ services:
       context: ./
       dockerfile: ./Dockerfile
     env_file: .env
-    environment:
-      - PATH=./node_modules/.bin:$PATH
     ports:
       - "8501:8501"

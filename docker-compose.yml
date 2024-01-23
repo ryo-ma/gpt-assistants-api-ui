@@ -1,5 +1,6 @@
 version: "3.8"
 services:
+  platform: linux/amd64
   app:
     build:
       context: ./

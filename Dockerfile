@@ -7,7 +7,8 @@ RUN apt update && \
     apt -y upgrade && \
     apt install -y ffmpeg && \
     apt install -y curl && \
-    apt install sudo && \
+    apt install -y sudo && \
+    apt install -y build-essential&& \
     curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && \
     apt install -y nodejs &&\
     export PATH=./node_modules/.bin:$PATH && \

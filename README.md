@@ -51,6 +51,8 @@
     
 4. 🔑 Set environment variables
 
+    Create a .env file.
+   
     ```bash
     OPENAI_API_KEY="sk-xxx"
     ASSISTANT_ID="asst_xxx"
@@ -59,7 +61,7 @@
     ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
     ```
     
-5. 💽 Build image
+6. 💽 Build image
 
     ```bash
     $ docker compose build

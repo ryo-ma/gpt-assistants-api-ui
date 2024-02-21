@@ -10,8 +10,18 @@ from openai.types.beta.threads import MessageContentImageFile
 from tools import TOOL_MAP
 
 
-api_key = os.environ.get("OPENAI_API_KEY")
-client = openai.OpenAI(api_key=api_key)
+azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
+openai_api_key = os.environ.get("OPENAI_API_KEY")
+client = None
+if azure_openai_endpoint and azure_openai_key:
+    client = openai.AzureOpenAI(
+        api_key=azure_openai_key,
+        api_version="2024-02-15-preview",
+        azure_endpoint=azure_openai_endpoint,
+    )
+else:
+    client = openai.OpenAI(api_key=openai_api_key)
 assistant_id = os.environ.get("ASSISTANT_ID")
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
 assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")

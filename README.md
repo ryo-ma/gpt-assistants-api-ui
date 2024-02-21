@@ -31,6 +31,7 @@
     ASSISTANT_TITLE="Assistants API UI"
     ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
     ```
+    If you use azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
 6. 🏃‍️ Run the app
 

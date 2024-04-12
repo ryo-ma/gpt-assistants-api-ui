@@ -9,8 +9,8 @@
 
 ## 🌟 Quick Start
 
-1. 👤 Create an assistant on the OpenAI site (Get assistant ID)
-2. 🔑 Get the API key from OpenAI
+1. 👤 Create an assistant on the OpenAI site (Get assistant ID https://platform.openai.com/assistants)
+2. 🔑 Get the API key from OpenAI (https://platform.openai.com/api-keys)
 3. ⬇️ Clone the repository
 
     ```bash
@@ -43,8 +43,8 @@
 
 ## 🐳 Run the app using Docker
 
-1. 👤 Create an assistant on the OpenAI site (Get assistant ID)
-2. 🔑 Get the API key from OpenAI
+1. 👤 Create an assistant on the OpenAI site (Get assistant ID https://platform.openai.com/assistants)
+2. 🔑 Get the API key from OpenAI (https://platform.openai.com/api-keys)
 3. ⬇️ Clone the repository
 
     ```bash

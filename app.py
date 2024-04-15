@@ -25,7 +25,9 @@ else:
 assistant_id = os.environ.get("ASSISTANT_ID")
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
 assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
-enabled_file_upload_message = os.environ.get("ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file")
+enabled_file_upload_message = os.environ.get(
+    "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
+)
 
 
 def create_thread(content, file):
@@ -150,10 +152,11 @@ def get_response(user_input, file):
                     ):
                         input_code = f"### code interpreter\ninput:\n```python\n{tool_call.code_interpreter.input}\n```"
                         print(input_code)
-                        if (
-                            len(st.session_state.tool_calls) == 0
-                            or tool_call.id not in [x.id for x in st.session_state.tool_calls]
-                        ):
+                        if len(
+                            st.session_state.tool_calls
+                        ) == 0 or tool_call.id not in [
+                            x.id for x in st.session_state.tool_calls
+                        ]:
                             st.session_state.tool_calls.append(tool_call)
                             with st.chat_message("Assistant"):
                                 st.markdown(

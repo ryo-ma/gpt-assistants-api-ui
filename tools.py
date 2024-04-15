@@ -1,4 +1,3 @@
-
 # example function
 def example_function(address):
     pass

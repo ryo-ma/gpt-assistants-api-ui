@@ -45,16 +45,16 @@ class EventHandler(AssistantEventHandler):
     def on_text_delta(self, delta, snapshot):
         if delta.value:
             st.session_state.current_message += delta.value
-            st.session_state.current_markdown.markdown(st.session_state.current_message, True)
+            st.session_state.current_markdown.markdown(
+                st.session_state.current_message, True
+            )
 
     @override
     def on_text_done(self, text):
         citations = []
         text_value = text.value
         for index, annotation in enumerate(text.annotations):
-            text_value = text.value.replace(
-                annotation.text, f" [{index}]"
-            )
+            text_value = text.value.replace(annotation.text, f" [{index}]")
 
             if file_citation := getattr(annotation, "file_citation", None):
                 cited_file = client.files.retrieve(file_citation.file_id)
@@ -63,7 +63,8 @@ class EventHandler(AssistantEventHandler):
                 )
             elif file_path := getattr(annotation, "file_path", None):
                 link_tag = create_file_link(
-                    annotation.text.split("/")[-1], file_path.file_id,
+                    annotation.text.split("/")[-1],
+                    file_path.file_id,
                 )
                 text_value = re.sub(
                     r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", link_tag, text_value
@@ -73,7 +74,7 @@ class EventHandler(AssistantEventHandler):
 
     @override
     def on_tool_call_created(self, tool_call):
-        if tool_call.type == 'code_interpreter':
+        if tool_call.type == "code_interpreter":
             st.session_state.current_tool_input = ""
             with st.chat_message("Assistant"):
                 st.session_state.current_tool_input_markdown = st.empty()
@@ -84,7 +85,7 @@ class EventHandler(AssistantEventHandler):
             with st.chat_message("Assistant"):
                 st.session_state.current_tool_input_markdown = st.empty()
 
-        if delta.type == 'code_interpreter':
+        if delta.type == "code_interpreter":
             if delta.code_interpreter.input:
                 st.session_state.current_tool_input += delta.code_interpreter.input
                 input_code = f"### code interpreter\ninput:\n```python\n{st.session_state.current_tool_input}\n```"
@@ -97,7 +98,6 @@ class EventHandler(AssistantEventHandler):
 
     @override
     def on_tool_call_done(self, tool_call):
-
         st.session_state.tool_calls.append(tool_call)
         if tool_call.type == "code_interpreter":
             if tool_call.id in [x.id for x in st.session_state.tool_calls]:
@@ -111,19 +111,33 @@ class EventHandler(AssistantEventHandler):
                     output = f"### code interpreter\noutput:\n```\n{output.logs}\n```"
                     with st.chat_message("Assistant"):
                         st.markdown(output, True)
-                        st.session_state.chat_log.append({"name": "assistant", "msg": output})
-        elif tool_call.type == 'function' and self.current_run.status == 'requires_action':
+                        st.session_state.chat_log.append(
+                            {"name": "assistant", "msg": output}
+                        )
+        elif (
+            tool_call.type == "function"
+            and self.current_run.status == "requires_action"
+        ):
             with st.chat_message("Assistant"):
-                msg = f"###Function Calling: {tool_call.function.name}"
+                msg = f"### Function Calling: {tool_call.function.name}"
                 st.markdown(f"###Function Calling: {tool_call.function.name}", True)
                 st.session_state.chat_log.append({"name": "assistant", "msg": msg})
             tool_calls = self.current_run.required_action.submit_tool_outputs.tool_calls
             tool_outputs = []
             for submit_tool_call in tool_calls:
                 tool_function_name = submit_tool_call.function.name
-                tool_function_arguments = json.loads(submit_tool_call.function.arguments)
-                tool_function_output = TOOL_MAP[tool_function_name](**tool_function_arguments)
-                tool_outputs.append({"tool_call_id": submit_tool_call.id, "output": tool_function_output})
+                tool_function_arguments = json.loads(
+                    submit_tool_call.function.arguments
+                )
+                tool_function_output = TOOL_MAP[tool_function_name](
+                    **tool_function_arguments
+                )
+                tool_outputs.append(
+                    {
+                        "tool_call_id": submit_tool_call.id,
+                        "output": tool_function_output,
+                    }
+                )
 
             with client.beta.threads.runs.submit_tool_outputs_stream(
                 thread_id=st.session_state.thread.id,
@@ -150,7 +164,9 @@ def create_thread(content, file):
 def create_message(thread, content, file):
     attachments = []
     if file is not None:
-        attachments.append({"file_id": file.id, "tools": [{"type": "code_interpreter"}]})
+        attachments.append(
+            {"file_id": file.id, "tools": [{"type": "code_interpreter"}]}
+        )
     client.beta.threads.messages.create(
         thread_id=thread.id, role="user", content=content, attachments=attachments
     )

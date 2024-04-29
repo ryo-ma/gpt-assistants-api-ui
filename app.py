@@ -120,7 +120,7 @@ class EventHandler(AssistantEventHandler):
         ):
             with st.chat_message("Assistant"):
                 msg = f"### Function Calling: {tool_call.function.name}"
-                st.markdown(f"###Function Calling: {tool_call.function.name}", True)
+                st.markdown(msg, True)
                 st.session_state.chat_log.append({"name": "assistant", "msg": msg})
             tool_calls = self.current_run.required_action.submit_tool_outputs.tool_calls
             tool_outputs = []

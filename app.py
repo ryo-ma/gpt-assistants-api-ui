@@ -43,34 +43,20 @@ class EventHandler(AssistantEventHandler):
 
     @override
     def on_text_delta(self, delta, snapshot):
-        if delta.value:
-            st.session_state.current_message += delta.value
+        if snapshot.value:
+            text_value = re.sub(
+                r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", "Download Link", snapshot.value
+            )
+            st.session_state.current_message = text_value
             st.session_state.current_markdown.markdown(
                 st.session_state.current_message, True
             )
 
     @override
     def on_text_done(self, text):
-        citations = []
-        text_value = text.value
-        for index, annotation in enumerate(text.annotations):
-            text_value = text.value.replace(annotation.text, f" [{index}]")
-
-            if file_citation := getattr(annotation, "file_citation", None):
-                cited_file = client.files.retrieve(file_citation.file_id)
-                citations.append(
-                    f"[{index}] {file_citation.quote} from {cited_file.filename}"
-                )
-            elif file_path := getattr(annotation, "file_path", None):
-                link_tag = create_file_link(
-                    annotation.text.split("/")[-1],
-                    file_path.file_id,
-                )
-                text_value = re.sub(
-                    r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", link_tag, text_value
-                )
-        st.session_state.current_markdown.markdown(text_value, True)
-        st.session_state.chat_log.append({"name": "assistant", "msg": text_value})
+        format_text = format_annotation(text)
+        st.session_state.current_markdown.markdown(format_text, True)
+        st.session_state.chat_log.append({"name": "assistant", "msg": format_text})
 
     @override
     def on_tool_call_created(self, tool_call):
@@ -178,6 +164,29 @@ def create_file_link(file_name, file_id):
     b64 = base64.b64encode(content.text.encode(content.encoding)).decode()
     link_tag = f'<a href="data:{content_type};base64,{b64}" download="{file_name}">Download Link</a>'
     return link_tag
+
+
+def format_annotation(text):
+    citations = []
+    text_value = text.value
+    for index, annotation in enumerate(text.annotations):
+        text_value = text.value.replace(annotation.text, f" [{index}]")
+
+        if file_citation := getattr(annotation, "file_citation", None):
+            cited_file = client.files.retrieve(file_citation.file_id)
+            citations.append(
+                f"[{index}] {file_citation.quote} from {cited_file.filename}"
+            )
+        elif file_path := getattr(annotation, "file_path", None):
+            link_tag = create_file_link(
+                annotation.text.split("/")[-1],
+                file_path.file_id,
+            )
+            text_value = re.sub(
+                r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", link_tag, text_value
+            )
+    text_value += "\n\n" + "\n".join(citations)
+    return text_value
 
 
 def run_stream(user_input, file):

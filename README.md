@@ -5,7 +5,7 @@
 * 📁 Supports file upload and file download
 * 🏃 Supports Streaming API
 * ~🪟 Support to Azure OpenAI~
-　　* ※ Cannot be used until Azure OpenAI Service supports Streaming API
+  * ※ Cannot be used until Azure OpenAI Service supports Streaming API
 
 <img width="1459" alt="スクリーンショット 2023-11-20 2 23 51" src="https://github.com/ryo-ma/gpt-assistants-api-ui/assets/6661165/5c288d51-196a-4919-bc4d-dc508146f58a">
 

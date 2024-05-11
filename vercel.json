@@ -3,12 +3,19 @@
     {
       "src": "*.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "run.sh",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "."
+      }
     }
   ],
   "routes": [
-        {
+    {
       "src": "/(.*)",
-      "dest": "app.py"
+      "dest": "run.sh"
     }
   ]
 }

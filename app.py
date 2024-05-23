@@ -13,6 +13,10 @@ from typing_extensions import override
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 openai_api_key = os.environ.get("OPENAI_API_KEY")
+auth_username = os.environ.get("USERNAME")
+auth_password = os.environ.get("PASSWORD")
+
+
 client = None
 if azure_openai_endpoint and azure_openai_key:
     client = openai.AzureOpenAI(
@@ -226,43 +230,65 @@ def disable_form():
     st.session_state.in_progress = True
 
 
+def authenticate(username, password):
+    return username == auth_username and password == auth_password
+
+
+def login():
+    st.title("Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if st.button("Login"):
+        if authenticate(username, password):
+            st.session_state["authenticated"] = True
+            st.experimental_rerun()
+        else:
+            st.error("Invalid username or password")
+
+
 def main():
-    st.title(assistant_title)
-    user_msg = st.chat_input(
-        "Message", on_submit=disable_form, disabled=st.session_state.in_progress
-    )
-    if enabled_file_upload_message:
-        uploaded_file = st.sidebar.file_uploader(
-            enabled_file_upload_message,
-            type=[
-                "txt",
-                "pdf",
-                "png",
-                "jpg",
-                "jpeg",
-                "csv",
-                "json",
-                "geojson",
-                "xlsx",
-                "xls",
-            ],
-            disabled=st.session_state.in_progress,
-        )
+    if "authenticated" not in st.session_state:
+        st.session_state["authenticated"] = False
+
+    if not st.session_state["authenticated"]:
+        login()
     else:
-        uploaded_file = None
-    if user_msg:
+        st.title(assistant_title)
+        user_msg = st.chat_input(
+            "Message", on_submit=disable_form, disabled=st.session_state.in_progress
+        )
+        if enabled_file_upload_message:
+            uploaded_file = st.sidebar.file_uploader(
+                enabled_file_upload_message,
+                type=[
+                    "txt",
+                    "pdf",
+                    "png",
+                    "jpg",
+                    "jpeg",
+                    "csv",
+                    "json",
+                    "geojson",
+                    "xlsx",
+                    "xls",
+                ],
+                disabled=st.session_state.in_progress,
+            )
+        else:
+            uploaded_file = None
+        if user_msg:
+            render_chat()
+            with st.chat_message("user"):
+                st.markdown(user_msg, True)
+            st.session_state.chat_log.append({"name": "user", "msg": user_msg})
+            file = None
+            if uploaded_file is not None:
+                file = handle_uploaded_file(uploaded_file)
+            run_stream(user_msg, file)
+            st.session_state.in_progress = False
+            st.session_state.tool_call = None
+            st.rerun()
         render_chat()
-        with st.chat_message("user"):
-            st.markdown(user_msg, True)
-        st.session_state.chat_log.append({"name": "user", "msg": user_msg})
-        file = None
-        if uploaded_file is not None:
-            file = handle_uploaded_file(uploaded_file)
-        run_stream(user_msg, file)
-        st.session_state.in_progress = False
-        st.session_state.tool_call = None
-        st.rerun()
-    render_chat()
 
 
 if __name__ == "__main__":

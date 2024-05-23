@@ -9,7 +9,9 @@ from openai import AssistantEventHandler
 from tools import TOOL_MAP
 from typing_extensions import override
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
+load_dotenv()
 
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
@@ -273,13 +275,18 @@ def logout():
 
 def main():
     initialize_session()
+
+    # Disable authentication if username or password is empty
+    if not auth_username or not auth_password:
+        st.session_state["authenticated"] = True
+
     if not is_authenticated():
         login()
     else:
         st.title(assistant_title)
-        if st.button("Logout"):
-            logout()
-
+        if auth_username and auth_password:
+            if st.button("Logout"):
+                logout()
         user_msg = st.chat_input(
             "Message", on_submit=disable_form, disabled=st.session_state.in_progress
         )

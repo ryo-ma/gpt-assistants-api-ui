@@ -61,7 +61,7 @@
 
     Create a .env file.
    
-    ```bash
+      ```bash
     OPENAI_API_KEY="sk-xxx"
     ASSISTANT_ID="asst_xxx"
 

@@ -16,8 +16,8 @@ load_dotenv()
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 openai_api_key = os.environ.get("OPENAI_API_KEY")
-auth_username = os.environ.get("USERNAME")
-auth_password = os.environ.get("PASSWORD")
+auth_username = os.environ.get("APP_USERNAME")
+auth_password = os.environ.get("APP_PASSWORD")
 
 
 client = None

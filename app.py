@@ -8,6 +8,7 @@ import openai
 from openai import AssistantEventHandler
 from tools import TOOL_MAP
 from typing_extensions import override
+from datetime import datetime, timedelta
 
 
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
@@ -186,9 +187,7 @@ def format_annotation(text):
                 annotation.text.split("/")[-1],
                 file_path.file_id,
             )
-            text_value = re.sub(
-                r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", link_tag, text_value
-            )
+            text_value = re.sub(r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", link_tag, text_value)
     text_value += "\n\n" + "\n".join(citations)
     return text_value
 
@@ -230,8 +229,29 @@ def disable_form():
     st.session_state.in_progress = True
 
 
+def initialize_session():
+    if "authenticated" not in st.session_state:
+        st.session_state["authenticated"] = False
+    if "login_time" not in st.session_state:
+        st.session_state["login_time"] = None
+
+
+def is_authenticated():
+    if not st.session_state["authenticated"]:
+        return False
+    if st.session_state["login_time"]:
+        if datetime.now() - st.session_state["login_time"] > timedelta(days=1):
+            st.session_state["authenticated"] = False
+            st.session_state["login_time"] = None
+            return False
+    return True
+
+
 def authenticate(username, password):
-    return username == auth_username and password == auth_password
+    if username == auth_username and password == auth_password:
+        st.session_state["authenticated"] = True
+        st.session_state["login_time"] = datetime.now()
+    return st.session_state["authenticated"]
 
 
 def login():
@@ -240,20 +260,26 @@ def login():
     password = st.text_input("Password", type="password")
     if st.button("Login"):
         if authenticate(username, password):
-            st.session_state["authenticated"] = True
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Invalid username or password")
 
 
-def main():
-    if "authenticated" not in st.session_state:
-        st.session_state["authenticated"] = False
+def logout():
+    st.session_state["authenticated"] = False
+    st.session_state["login_time"] = None
+    st.rerun()
 
-    if not st.session_state["authenticated"]:
+
+def main():
+    initialize_session()
+    if not is_authenticated():
         login()
     else:
         st.title(assistant_title)
+        if st.button("Logout"):
+            logout()
+
         user_msg = st.chat_input(
             "Message", on_submit=disable_form, disabled=st.session_state.in_progress
         )

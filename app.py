@@ -273,13 +273,18 @@ def logout():
 
 def main():
     initialize_session()
+
+    # Disable authentication if username or password is empty
+    if not auth_username or not auth_password:
+        st.session_state["authenticated"] = True
+
     if not is_authenticated():
         login()
     else:
         st.title(assistant_title)
-        if st.button("Logout"):
-            logout()
-
+        if auth_username and auth_password:
+            if st.button("Logout"):
+                logout()
         user_msg = st.chat_input(
             "Message", on_submit=disable_form, disabled=st.session_state.in_progress
         )

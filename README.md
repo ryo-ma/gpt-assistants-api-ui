@@ -33,6 +33,10 @@
 
     ASSISTANT_TITLE="Assistants API UI"
     ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
+   
+    # Leave either USERNAME or PASSWORD or both empty to disable login page
+    USERNAME="user"
+    PASSWORD="password"
     ```
     If you use azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
@@ -57,7 +61,7 @@
 
     Create a .env file.
    
-    ```bash
+      ```bash
     OPENAI_API_KEY="sk-xxx"
     ASSISTANT_ID="asst_xxx"
 

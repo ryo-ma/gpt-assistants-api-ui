@@ -11,7 +11,7 @@ python = "^3.10 || ^3.11"
 streamlit = "^1.28.2"
 openai = "^1.3.2"
 black = "^23.12.1"
-
+python-dotenv = "^1.0.1"
 
 [tool.poetry.group.develop.dependencies]
 black = "^23.11.0"

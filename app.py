@@ -8,7 +8,9 @@ import openai
 from openai import AssistantEventHandler
 from tools import TOOL_MAP
 from typing_extensions import override
+from dotenv import load_dotenv
 
+load_dotenv()
 
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
@@ -182,9 +184,7 @@ def format_annotation(text):
                 annotation.text.split("/")[-1],
                 file_path.file_id,
             )
-            text_value = re.sub(
-                r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", link_tag, text_value
-            )
+            text_value = re.sub(r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", link_tag, text_value)
     text_value += "\n\n" + "\n".join(citations)
     return text_value
 

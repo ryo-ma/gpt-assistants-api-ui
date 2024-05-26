@@ -33,14 +33,14 @@
 
     ASSISTANT_TITLE="Assistants API UI"
     ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
-   
-    # Leave either USERNAME or PASSWORD or both empty to disable login page
-    APP_USERNAME="user"
-    APP_PASSWORD="password"
     ```
     If you use azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
-6. 🏃‍️ Run the app
+6. 🔑 Set Authentication configuration (optional)
+
+   To set up authentication, create a config file `auth.yaml` and follow the detailed instructions in the [Streamlit-Authenticator documentation](https://github.com/mkhorasani/Streamlit-Authenticator#1-creating-a-configuration-file). Note that this app does not support new user registration or password resetting.
+
+7. 🏃‍️ Run the app
 
     ```bash
     $ poetry shell
@@ -67,13 +67,13 @@
 
     ASSISTANT_TITLE="Assistants API UI"
     ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
-   
-    # Leave either USERNAME or PASSWORD or both empty to disable login page
-    APP_USERNAME="user"
-    APP_PASSWORD="password"
     ```
     If you use Azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
-    
+
+5. 🔑 Set Authentication configuration (optional)
+
+   To set up authentication, create a config file `auth.yaml` and follow the detailed instructions in the [Streamlit-Authenticator documentation](https://github.com/mkhorasani/Streamlit-Authenticator#1-creating-a-configuration-file). Note that this app does not support new user registration or password resetting.
+
 6. 💽 Build image
 
     ```bash

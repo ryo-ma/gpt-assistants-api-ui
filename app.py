@@ -8,17 +8,46 @@ import openai
 from openai import AssistantEventHandler
 from tools import TOOL_MAP
 from typing_extensions import override
-from datetime import datetime, timedelta
 from dotenv import load_dotenv
+import streamlit_authenticator as stauth
+import yaml
+from yaml.loader import SafeLoader
+
 
 load_dotenv()
 
+# Constants
+AUTH_FILE_PATH = "./auth.yaml"
+
+# Load environment variables
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 openai_api_key = os.environ.get("OPENAI_API_KEY")
-auth_username = os.environ.get("APP_USERNAME")
-auth_password = os.environ.get("APP_PASSWORD")
+assistant_id = os.environ.get("ASSISTANT_ID")
+instructions = os.environ.get("RUN_INSTRUCTIONS", "")
+assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
+enabled_file_upload_message = os.environ.get(
+    "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
+)
 
+
+def auth_file_exists():
+    return os.path.isfile(AUTH_FILE_PATH)
+
+
+# Load authentication configuration
+if auth_file_exists():
+    with open(AUTH_FILE_PATH) as file:
+        config = yaml.load(file, Loader=SafeLoader)
+    authenticator = stauth.Authenticate(
+        config["credentials"],
+        config["cookie"]["name"],
+        config["cookie"]["key"],
+        config["cookie"]["expiry_days"],
+        config["pre-authorized"],
+    )
+else:
+    authenticator = None  # No authentication should be performed
 
 client = None
 if azure_openai_endpoint and azure_openai_key:
@@ -29,12 +58,6 @@ if azure_openai_endpoint and azure_openai_key:
     )
 else:
     client = openai.OpenAI(api_key=openai_api_key)
-assistant_id = os.environ.get("ASSISTANT_ID")
-instructions = os.environ.get("RUN_INSTRUCTIONS", "")
-assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
-enabled_file_upload_message = os.environ.get(
-    "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
-)
 
 
 class EventHandler(AssistantEventHandler):
@@ -231,97 +254,64 @@ def disable_form():
     st.session_state.in_progress = True
 
 
-def initialize_session():
-    if "authenticated" not in st.session_state:
-        st.session_state["authenticated"] = False
-    if "login_time" not in st.session_state:
-        st.session_state["login_time"] = None
-
-
-def is_authenticated():
-    if not st.session_state["authenticated"]:
-        return False
-    if st.session_state["login_time"]:
-        if datetime.now() - st.session_state["login_time"] > timedelta(days=1):
-            st.session_state["authenticated"] = False
-            st.session_state["login_time"] = None
-            return False
-    return True
-
-
-def authenticate(username, password):
-    if username == auth_username and password == auth_password:
-        st.session_state["authenticated"] = True
-        st.session_state["login_time"] = datetime.now()
-    return st.session_state["authenticated"]
-
-
 def login():
-    st.title("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
-        if authenticate(username, password):
-            st.rerun()
-        else:
-            st.error("Invalid username or password")
-
-
-def logout():
-    st.session_state["authenticated"] = False
-    st.session_state["login_time"] = None
-    st.rerun()
+    if st.session_state["authentication_status"] is False:
+        st.error("Username/password is incorrect")
+    elif st.session_state["authentication_status"] is None:
+        st.warning("Please enter your username and password")
 
 
 def main():
-    initialize_session()
-
-    # Disable authentication if username or password is empty
-    if not auth_username or not auth_password:
-        st.session_state["authenticated"] = True
-
-    if not is_authenticated():
-        login()
+    if auth_file_exists() and authenticator is not None:
+        authenticator.login()
+        if not st.session_state["authentication_status"]:
+            login()
+            return
+        else:
+            st.title(assistant_title)
+            authenticator.logout(location="sidebar")
     else:
         st.title(assistant_title)
-        if auth_username and auth_password:
-            if st.button("Logout"):
-                logout()
-        user_msg = st.chat_input(
-            "Message", on_submit=disable_form, disabled=st.session_state.in_progress
+
+    user_msg = st.chat_input(
+        "Message", on_submit=disable_form, disabled=st.session_state.in_progress
+    )
+
+    if enabled_file_upload_message:
+        uploaded_file = st.sidebar.file_uploader(
+            enabled_file_upload_message,
+            type=[
+                "txt",
+                "pdf",
+                "png",
+                "jpg",
+                "jpeg",
+                "csv",
+                "json",
+                "geojson",
+                "xlsx",
+                "xls",
+            ],
+            disabled=st.session_state.in_progress,
         )
-        if enabled_file_upload_message:
-            uploaded_file = st.sidebar.file_uploader(
-                enabled_file_upload_message,
-                type=[
-                    "txt",
-                    "pdf",
-                    "png",
-                    "jpg",
-                    "jpeg",
-                    "csv",
-                    "json",
-                    "geojson",
-                    "xlsx",
-                    "xls",
-                ],
-                disabled=st.session_state.in_progress,
-            )
-        else:
-            uploaded_file = None
-        if user_msg:
-            render_chat()
-            with st.chat_message("user"):
-                st.markdown(user_msg, True)
-            st.session_state.chat_log.append({"name": "user", "msg": user_msg})
-            file = None
-            if uploaded_file is not None:
-                file = handle_uploaded_file(uploaded_file)
-            run_stream(user_msg, file)
-            st.session_state.in_progress = False
-            st.session_state.tool_call = None
-            st.rerun()
+    else:
+        uploaded_file = None
+
+    if user_msg:
         render_chat()
+        with st.chat_message("user"):
+            st.markdown(user_msg, True)
+        st.session_state.chat_log.append({"name": "user", "msg": user_msg})
+
+        file = None
+        if uploaded_file is not None:
+            file = handle_uploaded_file(uploaded_file)
+        run_stream(user_msg, file)
+        st.session_state.in_progress = False
+        st.session_state.tool_call = None
+        st.rerun()
+
+    render_chat()
 
 
 if __name__ == "__main__":

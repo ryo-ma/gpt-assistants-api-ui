@@ -90,6 +90,42 @@ Access to [http://localhost:8501](http://localhost:8501).
 ## 🌐 Deploy to Streamlit Cloud
 You can fork this repository and deploy the app to https://share.streamlit.io/. No need to run the app on your local machine.
 
-If you use Streamlit Cloud, you won't be able to use the custom Authentication feature with `auth.yaml` file. Please consider setting your deployment to private. [Learn more](https://docs.streamlit.io/deploy/streamlit-community-cloud/share-your-app#share-your-private-app)
-
 > Don't forget to choose 3.10 as the Python version and set environment variables in the "Advanced settings" during deployment.
+
+To use authentication with Streamlit Cloud, please use this TOML format:
+
+```toml
+# App configs
+
+[openai]
+api_key = "sk-xxx"
+assistant_id = "asst_xxx"
+
+[assistant]
+title = "Assistants API UI"
+enabled_file_upload_message = "Upload a file"  # Leave empty to disable
+
+# Authentication
+
+[credentials.usernames.jsmith]
+email = "jsmith@gmail.com"
+failed_login_attempts = 0  # Will be managed automatically
+logged_in = false  # Will be managed automatically
+name = "John Smith"
+password = "abc"  # Will be hashed automatically
+
+[credentials.usernames.rbriggs]
+email = "rbriggs@gmail.com"
+failed_login_attempts = 0  # Will be managed automatically
+logged_in = false  # Will be managed automatically
+name = "Rebecca Briggs"
+password = "def"  # Will be hashed automatically
+
+[cookie]
+expiry_days = 30
+key = "some_signature_key"  # Must be string
+name = "some_cookie_name"
+
+[pre-authorized]
+emails = ["melsby@gmail.com"]
+```

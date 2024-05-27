@@ -22,7 +22,7 @@ def str_to_bool(str_input):
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 openai_api_key = os.environ.get("OPENAI_API_KEY")
-authentication_required = str_to_bool(os.environ.get("AUTHENTICATION_REQUIRED"))
+authentication_required = str_to_bool(os.environ.get("AUTHENTICATION_REQUIRED", False))
 assistant_id = os.environ.get("ASSISTANT_ID")
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
 assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")

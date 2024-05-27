@@ -72,7 +72,18 @@
 
 5. 🔑 Set Authentication configuration (optional)
 
-   To set up authentication, create a config file `auth.yaml` and follow the detailed instructions in the [Streamlit-Authenticator documentation](https://github.com/mkhorasani/Streamlit-Authenticator#1-creating-a-configuration-file). Note that this app does not support new user registration or password resetting.
+   To set up authentication, create a [secrets](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management) file `.streamlit/secrets.toml`  as below:
+
+   ```toml
+   [credentials]
+   usernames = { jsmith = {failed_login_attempts = 0,  logged_in = false, name = "John Smith", password = "abc"}, rbriggs = {failed_login_attempts = 0,  logged_in = false, name = "R Briggs", password = "abc"}}
+   
+   [cookie]
+   expiry_days = 30
+   key = "some_signature_key"  # Must be string
+   name = "some_cookie_name"
+   ```
+   Reference:  [Deploying Streamlit-Authenticator via Streamlit Community Cloud](https://discuss.streamlit.io/t/deploying-streamlit-authenticator-via-streamlit-community-cloud/39085)
 
 6. 💽 Build image
 
@@ -95,37 +106,19 @@ You can fork this repository and deploy the app to https://share.streamlit.io/. 
 To use authentication with Streamlit Cloud, please use this TOML format:
 
 ```toml
-# App configs
+# Environment variables
+OPENAI_API_KEY="sk-xxx"
+ASSISTANT_ID="asst_xxx"
 
-[openai]
-api_key = "sk-xxx"
-assistant_id = "asst_xxx"
+ASSISTANT_TITLE="Assistants API UI"
+ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
 
-[assistant]
-title = "Assistants API UI"
-enabled_file_upload_message = "Upload a file"  # Leave empty to disable
-
-# Authentication
-
-[credentials.usernames.jsmith]
-email = "jsmith@gmail.com"
-failed_login_attempts = 0  # Will be managed automatically
-logged_in = false  # Will be managed automatically
-name = "John Smith"
-password = "abc"  # Will be hashed automatically
-
-[credentials.usernames.rbriggs]
-email = "rbriggs@gmail.com"
-failed_login_attempts = 0  # Will be managed automatically
-logged_in = false  # Will be managed automatically
-name = "Rebecca Briggs"
-password = "def"  # Will be hashed automatically
+# Authentication secrets
+[credentials]
+usernames = { jsmith = {failed_login_attempts = 0,  logged_in = false, name = "John Smith", password = "abc"}, rbriggs = {failed_login_attempts = 0,  logged_in = false, name = "R Briggs", password = "abc"}}
 
 [cookie]
 expiry_days = 30
 key = "some_signature_key"  # Must be string
 name = "some_cookie_name"
-
-[pre-authorized]
-emails = ["melsby@gmail.com"]
 ```

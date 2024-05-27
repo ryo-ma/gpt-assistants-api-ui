@@ -10,14 +10,8 @@ from tools import TOOL_MAP
 from typing_extensions import override
 from dotenv import load_dotenv
 import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader
-
 
 load_dotenv()
-
-# Constants
-AUTH_FILE_PATH = "./auth.yaml"
 
 # Load environment variables
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
@@ -30,21 +24,13 @@ enabled_file_upload_message = os.environ.get(
     "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
 )
 
-
-def auth_file_exists():
-    return os.path.isfile(AUTH_FILE_PATH)
-
-
 # Load authentication configuration
-if auth_file_exists():
-    with open(AUTH_FILE_PATH) as file:
-        config = yaml.load(file, Loader=SafeLoader)
+if "credentials" in st.secrets:
     authenticator = stauth.Authenticate(
-        config["credentials"],
-        config["cookie"]["name"],
-        config["cookie"]["key"],
-        config["cookie"]["expiry_days"],
-        config["pre-authorized"],
+        st.secrets["credentials"].to_dict(),
+        st.secrets["cookie"]["name"],
+        st.secrets["cookie"]["key"],
+        st.secrets["cookie"]["expiry_days"],
     )
 else:
     authenticator = None  # No authentication should be performed
@@ -262,7 +248,7 @@ def login():
 
 
 def main():
-    if auth_file_exists() and authenticator is not None:
+    if "credentials" in st.secrets and authenticator is not None:
         authenticator.login()
         if not st.session_state["authentication_status"]:
             login()

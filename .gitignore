@@ -5,4 +5,4 @@ files/*
 __pycache__
 /.idea
 .python-version
-auth.yaml
+.streamlit/secrets.toml

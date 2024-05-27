@@ -15,9 +15,9 @@ load_dotenv()
 
 
 def str_to_bool(str_input):
-    if str_input is not type(str):
+    if not isinstance(str_input, str):
         return False
-    return str.lower(str_input) in "true"
+    return str_input.lower() == "true"
 
 
 # Load environment variables

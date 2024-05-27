@@ -15,9 +15,6 @@ import streamlit_authenticator as stauth
 load_dotenv()
 
 
-# Constants
-AUTH_FILE_PATH = "./auth.yaml"
-
 # Load environment variables
 openai_api_key = os.environ.get("OPENAI_API_KEY")
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
@@ -208,13 +205,13 @@ def format_annotation(text):
     return text_value
 
 
-def run_stream(user_input, file):
+def run_stream(user_input, file, selected_assistant_id):
     if "thread" not in st.session_state:
         st.session_state.thread = create_thread(user_input, file)
     create_message(st.session_state.thread, user_input, file)
     with client.beta.threads.runs.stream(
         thread_id=st.session_state.thread.id,
-        assistant_id=assistant_id,
+        assistant_id=selected_assistant_id,
         event_handler=EventHandler(),
     ) as stream:
         stream.until_done()
@@ -257,7 +254,7 @@ def reset_chat():
 
 
 def main():
-    if "credentials" in st.secrets and authenticator is not None:
+    if authenticator is not None:
         authenticator.login()
         if not st.session_state["authentication_status"]:
             login()
@@ -265,7 +262,6 @@ def main():
         else:
             authenticator.logout(location="sidebar")
 
-    st.title(assistant_title)
     # Create a dictionary to map the formatted assistant options to respective objects
     assistants_object = {f'{obj["title"]}': obj for obj in openai_assistants}
 

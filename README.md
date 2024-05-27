@@ -36,9 +36,20 @@
     ```
     If you use azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
-6. 🔑 Set Authentication configuration (optional)
+6. 🔑 Set Authentication configuration
 
-   To set up authentication, create a config file `auth.yaml` and follow the detailed instructions in the [Streamlit-Authenticator documentation](https://github.com/mkhorasani/Streamlit-Authenticator#1-creating-a-configuration-file). Note that this app does not support new user registration or password resetting.
+   To set up authentication, create a [secrets](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management) file `.streamlit/secrets.toml`  as below:
+
+   ```toml
+   [credentials]
+   usernames = { jsmith = {failed_login_attempts = 0,  logged_in = false, name = "John Smith", password = "abc"}, rbriggs = {failed_login_attempts = 0,  logged_in = false, name = "R Briggs", password = "abc"}}
+   
+   [cookie]
+   expiry_days = 30
+   key = "some_signature_key"  # Must be string
+   name = "some_cookie_name"
+   ```
+   Reference:  [Deploying Streamlit-Authenticator via Streamlit Community Cloud](https://discuss.streamlit.io/t/deploying-streamlit-authenticator-via-streamlit-community-cloud/39085)
 
 7. 🏃‍️ Run the app
 
@@ -70,7 +81,7 @@
     ```
     If you use Azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
-5. 🔑 Set Authentication configuration (optional)
+5. 🔑 Set Authentication configuration
 
    To set up authentication, create a [secrets](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management) file `.streamlit/secrets.toml`  as below:
 

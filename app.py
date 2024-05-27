@@ -8,11 +8,43 @@ import openai
 from openai import AssistantEventHandler
 from tools import TOOL_MAP
 from typing_extensions import override
+from dotenv import load_dotenv
+import streamlit_authenticator as stauth
+
+load_dotenv()
 
 
+def str_to_bool(str_input):
+    if not isinstance(str_input, str):
+        return False
+    return str_input.lower() == "true"
+
+
+# Load environment variables
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 openai_api_key = os.environ.get("OPENAI_API_KEY")
+authentication_required = str_to_bool(os.environ.get("AUTHENTICATION_REQUIRED", False))
+assistant_id = os.environ.get("ASSISTANT_ID")
+instructions = os.environ.get("RUN_INSTRUCTIONS", "")
+assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
+enabled_file_upload_message = os.environ.get(
+    "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
+)
+
+
+# Load authentication configuration
+if authentication_required:
+    if "credentials" in st.secrets:
+        authenticator = stauth.Authenticate(
+            st.secrets["credentials"].to_dict(),
+            st.secrets["cookie"]["name"],
+            st.secrets["cookie"]["key"],
+            st.secrets["cookie"]["expiry_days"],
+        )
+    else:
+        authenticator = None  # No authentication should be performed
+
 client = None
 if azure_openai_endpoint and azure_openai_key:
     client = openai.AzureOpenAI(
@@ -22,12 +54,6 @@ if azure_openai_endpoint and azure_openai_key:
     )
 else:
     client = openai.OpenAI(api_key=openai_api_key)
-assistant_id = os.environ.get("ASSISTANT_ID")
-instructions = os.environ.get("RUN_INSTRUCTIONS", "")
-assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
-enabled_file_upload_message = os.environ.get(
-    "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
-)
 
 
 class EventHandler(AssistantEventHandler):
@@ -182,9 +208,7 @@ def format_annotation(text):
                 annotation.text.split("/")[-1],
                 file_path.file_id,
             )
-            text_value = re.sub(
-                r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", link_tag, text_value
-            )
+            text_value = re.sub(r"\[(.*?)\]\s*\(\s*(.*?)\s*\)", link_tag, text_value)
     text_value += "\n\n" + "\n".join(citations)
     return text_value
 
@@ -226,11 +250,31 @@ def disable_form():
     st.session_state.in_progress = True
 
 
+def login():
+    if st.session_state["authentication_status"] is False:
+        st.error("Username/password is incorrect")
+    elif st.session_state["authentication_status"] is None:
+        st.warning("Please enter your username and password")
+
+
 def main():
+    if (
+        authentication_required
+        and "credentials" in st.secrets
+        and authenticator is not None
+    ):
+        authenticator.login()
+        if not st.session_state["authentication_status"]:
+            login()
+            return
+        else:
+            authenticator.logout(location="sidebar")
+
     st.title(assistant_title)
     user_msg = st.chat_input(
         "Message", on_submit=disable_form, disabled=st.session_state.in_progress
     )
+
     if enabled_file_upload_message:
         uploaded_file = st.sidebar.file_uploader(
             enabled_file_upload_message,
@@ -250,11 +294,13 @@ def main():
         )
     else:
         uploaded_file = None
+
     if user_msg:
         render_chat()
         with st.chat_message("user"):
             st.markdown(user_msg, True)
         st.session_state.chat_log.append({"name": "user", "msg": user_msg})
+
         file = None
         if uploaded_file is not None:
             file = handle_uploaded_file(uploaded_file)
@@ -262,6 +308,7 @@ def main():
         st.session_state.in_progress = False
         st.session_state.tool_call = None
         st.rerun()
+
     render_chat()
 
 

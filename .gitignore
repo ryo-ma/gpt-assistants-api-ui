@@ -5,3 +5,5 @@ files/*
 __pycache__
 /.idea
 .python-version
+.streamlit/secrets.toml
+.devcontainer

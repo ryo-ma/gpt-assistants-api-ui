@@ -1,9 +1,15 @@
-.env
 .DS_Store
 files/*
 !files/.gitkeep
 __pycache__
 /.idea
 .python-version
+<<<<<<< HEAD
 .streamlit/secrets.toml
 .devcontainer
+=======
+auth.yaml
+config.yaml
+properties.toml
+.env
+>>>>>>> 1ac46c9 (Revert using .env)

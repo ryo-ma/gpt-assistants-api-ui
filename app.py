@@ -11,18 +11,23 @@ from typing_extensions import override
 from dotenv import load_dotenv
 import streamlit_authenticator as stauth
 
+
 load_dotenv()
 
+
+# Constants
+AUTH_FILE_PATH = "./auth.yaml"
+
 # Load environment variables
-azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
-azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 openai_api_key = os.environ.get("OPENAI_API_KEY")
-assistant_id = os.environ.get("ASSISTANT_ID")
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
-assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
 enabled_file_upload_message = os.environ.get(
     "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
 )
+openai_assistants = json.loads(os.environ.get("OPENAI_ASSISTANTS"))
+azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
+
 
 # Load authentication configuration
 if "credentials" in st.secrets:
@@ -247,6 +252,10 @@ def login():
         st.warning("Please enter your username and password")
 
 
+def reset_chat():
+    st.session_state.chat_log = []
+
+
 def main():
     if "credentials" in st.secrets and authenticator is not None:
         authenticator.login()
@@ -257,8 +266,15 @@ def main():
             authenticator.logout(location="sidebar")
 
     st.title(assistant_title)
-    user_msg = st.chat_input(
-        "Message", on_submit=disable_form, disabled=st.session_state.in_progress
+    # Create a dictionary to map the formatted assistant options to respective objects
+    assistants_object = {f'{obj["title"]}': obj for obj in openai_assistants}
+
+    selected_assistant = st.sidebar.selectbox(
+        "Select an assistant profile?",
+        list(assistants_object.keys()),
+        index=None,
+        placeholder="Select an assistant profile...",
+        on_change=reset_chat,  # Call the reset function on change
     )
 
     if enabled_file_upload_message:
@@ -281,21 +297,27 @@ def main():
     else:
         uploaded_file = None
 
-    if user_msg:
+    if selected_assistant is not None:
+        st.title(assistants_object[selected_assistant]["title"])
+
+        user_msg = st.chat_input(
+            "Message", on_submit=disable_form, disabled=st.session_state.in_progress
+        )
+        if user_msg:
+            render_chat()
+            with st.chat_message("user"):
+                st.markdown(user_msg, True)
+            st.session_state.chat_log.append({"name": "user", "msg": user_msg})
+
+            file = None
+            if uploaded_file is not None:
+                file = handle_uploaded_file(uploaded_file)
+            run_stream(user_msg, file, assistants_object[selected_assistant]["id"])
+            st.session_state.in_progress = False
+            st.session_state.tool_call = None
+            st.rerun()
+
         render_chat()
-        with st.chat_message("user"):
-            st.markdown(user_msg, True)
-        st.session_state.chat_log.append({"name": "user", "msg": user_msg})
-
-        file = None
-        if uploaded_file is not None:
-            file = handle_uploaded_file(uploaded_file)
-        run_stream(user_msg, file)
-        st.session_state.in_progress = False
-        st.session_state.tool_call = None
-        st.rerun()
-
-    render_chat()
 
 
 if __name__ == "__main__":

@@ -33,10 +33,12 @@
 
     ASSISTANT_TITLE="Assistants API UI"
     ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
+   
+    AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
     ```
     If you use azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
-6. 🔑 Set Authentication configuration
+6. 🔑 Set Authentication configuration (optional)
 
    To set up authentication, create a [secrets](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management) file `.streamlit/secrets.toml`  as below:
 
@@ -78,10 +80,12 @@
 
     ASSISTANT_TITLE="Assistants API UI"
     ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
+   
+    AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
     ```
     If you use Azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
-5. 🔑 Set Authentication configuration
+5. 🔑 Set Authentication configuration (optional)
 
    To set up authentication, create a [secrets](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management) file `.streamlit/secrets.toml`  as below:
 
@@ -123,6 +127,8 @@ ASSISTANT_ID="asst_xxx"
 
 ASSISTANT_TITLE="Assistants API UI"
 ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
+
+AUTHENTICATION_REQUIRED="True"
 
 # Authentication secrets
 [credentials]

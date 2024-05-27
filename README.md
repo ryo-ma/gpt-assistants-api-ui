@@ -36,7 +36,7 @@
     ```
     If you use azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
-6. 🔑 Set Authentication configuration (optional)
+6. 🔑 Set Authentication configuration
 
     To set up authentication, create a [secrets](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management) file `.streamlit/secrets.toml`  as below:
     

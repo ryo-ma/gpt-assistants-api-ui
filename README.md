@@ -27,16 +27,17 @@
 
 5. ⚙️ Set environment variables file `.env`
 
-    ```dotenv
+    ```bash
     # OpenAI settings
     OPENAI_API_KEY="sk-xxx"
     APP_ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
     # OpenAI assistants
     OPENAI_ASSISTANTS='[{"id": "asst_xxx", "title": "Assistants XXX UI"}, {"id": "asst_yyy", "title": "Assistants YYY UI"}]'
+    AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
     ```
     If you use azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
-6. 🔑 Set Authentication configuration
+6. 🔑 Set Authentication configuration (optional)
 
     To set up authentication, create a [secrets](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management) file `.streamlit/secrets.toml`  as below:
     
@@ -85,7 +86,9 @@ To use authentication with Streamlit Cloud, please use this TOML format:
 # Environment variables
 OPENAI_API_KEY="sk-xxx"
 APP_ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
+# OpenAI assistants
 OPENAI_ASSISTANTS='[{"id": "asst_xxx", "title": "Assistants XXX UI"}, {"id": "asst_yyy", "title": "Assistants YYY UI"}]'
+AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
 
 # Authentication secrets
 [credentials]

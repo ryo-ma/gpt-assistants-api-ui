@@ -11,31 +11,34 @@ from typing_extensions import override
 from dotenv import load_dotenv
 import streamlit_authenticator as stauth
 
-
 load_dotenv()
 
 
 # Load environment variables
+azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 openai_api_key = os.environ.get("OPENAI_API_KEY")
+authentication_required = str_to_bool(os.environ.get("AUTHENTICATION_REQUIRED", False))
+assistant_id = os.environ.get("ASSISTANT_ID")
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
+assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
 enabled_file_upload_message = os.environ.get(
     "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
 )
-openai_assistants = json.loads(os.environ.get("OPENAI_ASSISTANTS"))
-azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
-azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 
 
 # Load authentication configuration
-if "credentials" in st.secrets:
-    authenticator = stauth.Authenticate(
-        st.secrets["credentials"].to_dict(),
-        st.secrets["cookie"]["name"],
-        st.secrets["cookie"]["key"],
-        st.secrets["cookie"]["expiry_days"],
-    )
-else:
-    authenticator = None  # No authentication should be performed
+if authentication_required:
+    if "credentials" in st.secrets:
+        authenticator = stauth.Authenticate(
+            st.secrets["credentials"].to_dict(),
+            st.secrets["cookie"]["name"],
+            st.secrets["cookie"]["key"],
+            st.secrets["cookie"]["expiry_days"],
+        )
+    else:
+        authenticator = None  # No authentication should be performed
+
 
 client = None
 if azure_openai_endpoint and azure_openai_key:
@@ -254,7 +257,11 @@ def reset_chat():
 
 
 def main():
-    if authenticator is not None:
+    if (
+        authentication_required
+        and "credentials" in st.secrets
+        and authenticator is not None
+    ):
         authenticator.login()
         if not st.session_state["authentication_status"]:
             login()

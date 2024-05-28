@@ -14,17 +14,22 @@ import streamlit_authenticator as stauth
 load_dotenv()
 
 
+def str_to_bool(str_input):
+    if not isinstance(str_input, str):
+        return False
+    return str_input.lower() == "true"
+
+
 # Load environment variables
-azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
-azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 openai_api_key = os.environ.get("OPENAI_API_KEY")
-authentication_required = str_to_bool(os.environ.get("AUTHENTICATION_REQUIRED", False))
-assistant_id = os.environ.get("ASSISTANT_ID")
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
-assistant_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
 enabled_file_upload_message = os.environ.get(
     "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
 )
+openai_assistants = json.loads(os.environ.get("OPENAI_ASSISTANTS"))
+azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
+authentication_required = str_to_bool(os.environ.get("AUTHENTICATION_REQUIRED", False))
 
 
 # Load authentication configuration
@@ -254,6 +259,7 @@ def login():
 
 def reset_chat():
     st.session_state.chat_log = []
+    st.session_state.in_progress = False
 
 
 def main():

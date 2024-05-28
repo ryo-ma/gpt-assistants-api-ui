@@ -1,9 +1,10 @@
 # gpt-assistants-api-ui
 
 * 💬 OpenAI Assistants API chat UI
-* 🛠️ It works easily by setting the ASSISTANT ID
+* 🛠️ It works easily by setting the ASSISTANT IDs
 * 📁 Supports file upload and file download
 * 🏃 Supports Streaming API
+* 👥 Supports multiple Assistant profiles in one place
 * ~🪟 Support to Azure OpenAI~
   * ※ Cannot be used until Azure OpenAI Service supports Streaming API
 

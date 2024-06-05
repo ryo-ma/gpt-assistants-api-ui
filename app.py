@@ -93,7 +93,7 @@ class EventHandler(AssistantEventHandler):
 
     @override
     def on_tool_call_delta(self, delta, snapshot):
-        if st.session_state.current_tool_input_markdown is None:
+        if 'current_tool_input_markdown' not in st.session_state:
             with st.chat_message("Assistant"):
                 st.session_state.current_tool_input_markdown = st.empty()
 

@@ -161,23 +161,14 @@ class EventHandler(AssistantEventHandler):
 
 
 def create_thread(content, file):
-    messages = [
-        {
-            "role": "user",
-            "content": content,
-        }
-    ]
-    if file is not None:
-        messages[0].update({"file_ids": [file.id]})
-    thread = client.beta.threads.create()
-    return thread
+    return client.beta.threads.create()
 
 
 def create_message(thread, content, file):
     attachments = []
     if file is not None:
         attachments.append(
-            {"file_id": file.id, "tools": [{"type": "code_interpreter"}]}
+            {"file_id": file.id, "tools": [{"type": "code_interpreter"}, {"type": "file_search"}]}
         )
     client.beta.threads.messages.create(
         thread_id=thread.id, role="user", content=content, attachments=attachments

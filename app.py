@@ -26,11 +26,9 @@ instructions = os.environ.get("RUN_INSTRUCTIONS", "")
 enabled_file_upload_message = os.environ.get(
     "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
 )
-openai_assistants = json.loads(os.environ.get("OPENAI_ASSISTANTS"))
 azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 azure_openai_key = os.environ.get("AZURE_OPENAI_KEY")
 authentication_required = str_to_bool(os.environ.get("AUTHENTICATION_REQUIRED", False))
-
 
 # Load authentication configuration
 if authentication_required:
@@ -43,7 +41,6 @@ if authentication_required:
         )
     else:
         authenticator = None  # No authentication should be performed
-
 
 client = None
 if azure_openai_endpoint and azure_openai_key:
@@ -262,30 +259,7 @@ def reset_chat():
     st.session_state.in_progress = False
 
 
-def main():
-    if (
-        authentication_required
-        and "credentials" in st.secrets
-        and authenticator is not None
-    ):
-        authenticator.login()
-        if not st.session_state["authentication_status"]:
-            login()
-            return
-        else:
-            authenticator.logout(location="sidebar")
-
-    # Create a dictionary to map the formatted assistant options to respective objects
-    assistants_object = {f'{obj["title"]}': obj for obj in openai_assistants}
-
-    selected_assistant = st.sidebar.selectbox(
-        "Select an assistant profile?",
-        list(assistants_object.keys()),
-        index=None,
-        placeholder="Select an assistant profile...",
-        on_change=reset_chat,  # Call the reset function on change
-    )
-
+def load_chat_screen(assistant_id, assistant_title):
     if enabled_file_upload_message:
         uploaded_file = st.sidebar.file_uploader(
             enabled_file_upload_message,
@@ -306,27 +280,64 @@ def main():
     else:
         uploaded_file = None
 
-    if selected_assistant is not None:
-        st.title(assistants_object[selected_assistant]["title"])
-
-        user_msg = st.chat_input(
-            "Message", on_submit=disable_form, disabled=st.session_state.in_progress
-        )
-        if user_msg:
-            render_chat()
-            with st.chat_message("user"):
-                st.markdown(user_msg, True)
-            st.session_state.chat_log.append({"name": "user", "msg": user_msg})
-
-            file = None
-            if uploaded_file is not None:
-                file = handle_uploaded_file(uploaded_file)
-            run_stream(user_msg, file, assistants_object[selected_assistant]["id"])
-            st.session_state.in_progress = False
-            st.session_state.tool_call = None
-            st.rerun()
-
+    st.title(assistant_title if assistant_title else "")
+    user_msg = st.chat_input(
+        "Message", on_submit=disable_form, disabled=st.session_state.in_progress
+    )
+    if user_msg:
         render_chat()
+        with st.chat_message("user"):
+            st.markdown(user_msg, True)
+        st.session_state.chat_log.append({"name": "user", "msg": user_msg})
+
+        file = None
+        if uploaded_file is not None:
+            file = handle_uploaded_file(uploaded_file)
+        run_stream(user_msg, file, assistant_id)
+        st.session_state.in_progress = False
+        st.session_state.tool_call = None
+        st.rerun()
+
+    render_chat()
+
+
+def main():
+    # Check if multi-agent settings are defined
+    multi_agents = os.environ.get("OPENAI_ASSISTANTS", None)
+    single_agent_id = os.environ.get("ASSISTANT_ID", None)
+    single_agent_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
+
+    if (
+        authentication_required
+        and "credentials" in st.secrets
+        and authenticator is not None
+    ):
+        authenticator.login()
+        if not st.session_state["authentication_status"]:
+            login()
+            return
+        else:
+            authenticator.logout(location="sidebar")
+
+    if multi_agents:
+        assistants_json = json.loads(multi_agents)
+        assistants_object = {f'{obj["title"]}': obj for obj in assistants_json}
+        selected_assistant = st.sidebar.selectbox(
+            "Select an assistant profile?",
+            list(assistants_object.keys()),
+            index=None,
+            placeholder="Select an assistant profile...",
+            on_change=reset_chat,  # Call the reset function on change
+        )
+        if selected_assistant:
+            load_chat_screen(
+                assistants_object[selected_assistant]["id"],
+                assistants_object[selected_assistant]["title"],
+            )
+    elif single_agent_id:
+        load_chat_screen(single_agent_id, single_agent_title)
+    else:
+        st.error("No assistant configurations defined in environment variables.")
 
 
 if __name__ == "__main__":

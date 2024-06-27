@@ -46,7 +46,7 @@ client = None
 if azure_openai_endpoint and azure_openai_key:
     client = openai.AzureOpenAI(
         api_key=azure_openai_key,
-        api_version="2024-02-15-preview",
+        api_version="2024-05-01-preview",
         azure_endpoint=azure_openai_endpoint,
     )
 else:

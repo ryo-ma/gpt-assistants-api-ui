@@ -5,7 +5,7 @@
 * 📁 Supports file upload and file download
 * 🏃 Supports Streaming API
 * 👥 Supports multiple Assistant profiles in one place
-* ~🪟 Support to Azure OpenAI~
+* 🪟 Support to Azure OpenA
   * ※ Cannot be used until Azure OpenAI Service supports Streaming API
 
 <img width="1459" alt="スクリーンショット 2023-11-20 2 23 51" src="https://github.com/ryo-ma/gpt-assistants-api-ui/assets/6661165/5c288d51-196a-4919-bc4d-dc508146f58a">
@@ -36,7 +36,7 @@
     AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
 
     # When using only one assistant, set the following, unset the OPENAI_ASSISTANTS variable.
-    ASSISTANT_ID="asst_xxx" 
+    ASSISTANT_ID="asst_xxx"
     ASSISTANT_TITLE="Assistants API UI" # This is for the single agent title
 
     # When using multiple assistants, set the following.
@@ -47,11 +47,11 @@
 6. 🔑 Set Authentication configuration (optional)
 
     To set up authentication, create a [secrets](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management) file `.streamlit/secrets.toml`  as below:
-    
+
     ```toml
     [credentials]
     usernames = { jsmith = {failed_login_attempts = 0,  logged_in = false, name = "John Smith", password = "abc"}, rbriggs = {failed_login_attempts = 0,  logged_in = false, name = "R Briggs", password = "abc"}}
- 
+
     [cookie]
     expiry_days = 30
     key = "some_signature_key"  # Must be string
@@ -98,7 +98,7 @@ APP_ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
 AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
 
 # When using only one assistant, set the following, unset the OPENAI_ASSISTANTS variable.
-ASSISTANT_ID="asst_xxx" 
+ASSISTANT_ID="asst_xxx"
 ASSISTANT_TITLE="Assistants API UI" # This is for the single agent title
 
 # When using multiple assistants, set the following.

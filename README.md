@@ -35,7 +35,7 @@
 
     AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
 
-    # When using only one assistant, set the following, unset the OPENAI_ASSISTANT
+    # When using only one assistant, set the following, unset the OPENAI_ASSISTANTS variable.
     ASSISTANT_ID="asst_xxx" 
     ASSISTANT_TITLE="Assistants API UI" # This is for the single agent title
 
@@ -97,7 +97,7 @@ APP_ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
 
 AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
 
-# When using only one assistant, set the following, unset the OPENAI_ASSISTANT
+# When using only one assistant, set the following, unset the OPENAI_ASSISTANTS variable.
 ASSISTANT_ID="asst_xxx" 
 ASSISTANT_TITLE="Assistants API UI" # This is for the single agent title
 

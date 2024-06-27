@@ -32,12 +32,15 @@
     # OpenAI settings
     OPENAI_API_KEY="sk-xxx"
     APP_ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
-    # OpenAI assistants
-    OPENAI_ASSISTANTS='[{"id": "asst_xxx", "title": "Assistants XXX UI"}, {"id": "asst_yyy", "title": "Assistants YYY UI"}]'
+
     AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
-   
-    ASSISTANT_ID="asst_xxx" # Comment out/remove OPENAI_ASSISTANTS variable to enable using a single agent
+
+    # When using only one assistant, set the following, unset the OPENAI_ASSISTANT
+    ASSISTANT_ID="asst_xxx" 
     ASSISTANT_TITLE="Assistants API UI" # This is for the single agent title
+
+    # When using multiple assistants, set the following.
+    OPENAI_ASSISTANTS='[{"id": "asst_xxx", "title": "Assistants XXX UI"}, {"id": "asst_yyy", "title": "Assistants YYY UI"}]'
     ```
     If you use azure instead, set `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_KEY`
 
@@ -88,14 +91,18 @@ To use authentication with Streamlit Cloud, please use this TOML format:
 
 ```toml
 # Environment variables
+# OpenAI settings
 OPENAI_API_KEY="sk-xxx"
 APP_ENABLED_FILE_UPLOAD_MESSAGE="Upload a file" # Leave empty to disable
-# OpenAI assistants
-OPENAI_ASSISTANTS='[{"id": "asst_xxx", "title": "Assistants XXX UI"}, {"id": "asst_yyy", "title": "Assistants YYY UI"}]'
+
 AUTHENTICATION_REQUIRED="False" # Must change to True if you require authentication
 
-ASSISTANT_ID="asst_xxx" # Comment out/remove OPENAI_ASSISTANTS variable to enable using a single agent
+# When using only one assistant, set the following, unset the OPENAI_ASSISTANT
+ASSISTANT_ID="asst_xxx" 
 ASSISTANT_TITLE="Assistants API UI" # This is for the single agent title
+
+# When using multiple assistants, set the following.
+OPENAI_ASSISTANTS='[{"id": "asst_xxx", "title": "Assistants XXX UI"}, {"id": "asst_yyy", "title": "Assistants YYY UI"}]'
 
 # Authentication secrets
 [credentials]

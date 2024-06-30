@@ -7,7 +7,7 @@ import streamlit as st
 import openai
 from openai import AssistantEventHandler
 from tools import TOOL_MAP
-from assistants import CURRENT_ASSISTANTS
+from assistants import current_assistants
 from typing_extensions import override
 from dotenv import load_dotenv
 import streamlit_authenticator as stauth
@@ -297,7 +297,7 @@ def main():
     # Check if multi-agent settings are defined
     # multi_agents = os.environ.get("OPENAI_ASSISTANTS", None)
     # load current from assistants.py
-    multi_agents = CURRENT_ASSISTANTS()
+    multi_agents = current_assistants()
     single_agent_id = os.environ.get("ASSISTANT_ID", None)
     single_agent_title = os.environ.get("ASSISTANT_TITLE", "Assistants API UI")
 

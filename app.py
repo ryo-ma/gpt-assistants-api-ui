@@ -15,6 +15,8 @@ load_dotenv()
 
 # Define here is you want to use Azure or not (even in enviroment variables are available, you may not want to go that way)
 useAzure = False
+# Define the very first hidden message to the bot
+initial_hidden_message = "Hei!"
 
 def str_to_bool(str_input):
     if not isinstance(str_input, str):
@@ -236,6 +238,9 @@ if "chat_log" not in st.session_state:
 if "in_progress" not in st.session_state:
     st.session_state.in_progress = False
 
+if "just_started" not in st.session_state:
+    st.session_state.just_started = True
+
 
 def disable_form():
     st.session_state.in_progress = True
@@ -251,6 +256,7 @@ def login():
 def reset_chat():
     st.session_state.chat_log = []
     st.session_state.in_progress = False
+    st.session_state.just_started = True
 
 
 def load_chat_screen(assistant_id, assistant_title):
@@ -278,17 +284,19 @@ def load_chat_screen(assistant_id, assistant_title):
     user_msg = st.chat_input(
         "Message", on_submit=disable_form, disabled=st.session_state.in_progress
     )
-    if not user_msg:
-        user_msg = "Hei!"
+    if st.session_state.just_started and not user_msg:
+        user_msg = initial_hidden_message
+    
     if user_msg:
-        render_chat()
-        with st.chat_message("user"):
-            st.markdown(user_msg, True)
-        st.session_state.chat_log.append({"name": "user", "msg": user_msg})
-
         file = None
-        if uploaded_file is not None:
-            file = handle_uploaded_file(uploaded_file)
+        if not st.session_state.just_started:
+            render_chat()
+            with st.chat_message("user"):
+                st.markdown(user_msg, True)
+            st.session_state.chat_log.append({"name": "user", "msg": user_msg})
+            if uploaded_file is not None:
+                file = handle_uploaded_file(uploaded_file)
+        st.session_state.just_started = False
         run_stream(user_msg, file, assistant_id)
         st.session_state.in_progress = False
         st.session_state.tool_call = None

@@ -278,6 +278,8 @@ def load_chat_screen(assistant_id, assistant_title):
     user_msg = st.chat_input(
         "Message", on_submit=disable_form, disabled=st.session_state.in_progress
     )
+    if not user_msg:
+        user_msg = "Hei!"
     if user_msg:
         render_chat()
         with st.chat_message("user"):

@@ -304,6 +304,16 @@ def load_chat_screen(assistant_id, assistant_title):
 
     render_chat()
 
+def authenticate_password(some_password):
+    if some_password != os.environ.get("USER_PASSWORD", None):
+        return False
+    return True
+
+some_password = st.text_input("Enter secret password:", type="password")
+
+if not authenticate_password(some_password):
+    st.error("Invalid Password. Access denied.")
+    st.stop()
 
 def main():
     # Check if multi-agent settings are defined

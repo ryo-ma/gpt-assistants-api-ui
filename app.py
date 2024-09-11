@@ -13,6 +13,8 @@ import streamlit_authenticator as stauth
 
 load_dotenv()
 
+# Define here is you want to use Azure or not (even in enviroment variables are available, you may not want to go that way)
+useAzure = False
 
 def str_to_bool(str_input):
     if not isinstance(str_input, str):
@@ -22,6 +24,7 @@ def str_to_bool(str_input):
 
 # Load environment variables
 openai_api_key = os.environ.get("OPENAI_API_KEY")
+print ("Using OPENAI Key:" + openai_api_key[:7] + "..." + openai_api_key[-5:])
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
 enabled_file_upload_message = os.environ.get(
     "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
@@ -43,7 +46,7 @@ if authentication_required:
         authenticator = None  # No authentication should be performed
 
 client = None
-if azure_openai_endpoint and azure_openai_key:
+if useAzure and azure_openai_endpoint and azure_openai_key:
     client = openai.AzureOpenAI(
         api_key=azure_openai_key,
         api_version="2024-05-01-preview",

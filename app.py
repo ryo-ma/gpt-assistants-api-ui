@@ -193,9 +193,10 @@ def format_annotation(text):
 
         if file_citation := getattr(annotation, "file_citation", None):
             cited_file = client.files.retrieve(file_citation.file_id)
-            citations.append(
-                f"[{index}] {file_citation.quote} from {cited_file.filename}"
-            )
+            if hasattr(file_citation, 'quote'):
+                citations.append(
+                    f"[{index}] {file_citation.quote} from {cited_file.filename}"
+                )
         elif file_path := getattr(annotation, "file_path", None):
             link_tag = create_file_link(
                 annotation.text.split("/")[-1],

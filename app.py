@@ -13,6 +13,9 @@ import streamlit_authenticator as stauth
 
 load_dotenv()
 
+assistant_icon = "🤖" # st.image('A2logo_neg_small.png')
+user_icon = "😍"      # st.image('A2logo_neg_small.png')
+
 # Define here is you want to use Azure or not (even in enviroment variables are available, you may not want to go that way)
 useAzure = False
 # Define the very first hidden message to the bot
@@ -66,7 +69,7 @@ class EventHandler(AssistantEventHandler):
     @override
     def on_text_created(self, text):
         st.session_state.current_message = ""
-        with st.chat_message("Assistant"):
+        with st.chat_message("Assistant", avatar=assistant_icon):
             st.session_state.current_markdown = st.empty()
 
     @override
@@ -90,13 +93,13 @@ class EventHandler(AssistantEventHandler):
     def on_tool_call_created(self, tool_call):
         if tool_call.type == "code_interpreter":
             st.session_state.current_tool_input = ""
-            with st.chat_message("Assistant"):
+            with st.chat_message("Assistant", avatar=assistant_icon):
                 st.session_state.current_tool_input_markdown = st.empty()
 
     @override
     def on_tool_call_delta(self, delta, snapshot):
         if 'current_tool_input_markdown' not in st.session_state:
-            with st.chat_message("Assistant"):
+            with st.chat_message("Assistant", avatar=assistant_icon):
                 st.session_state.current_tool_input_markdown = st.empty()
 
         if delta.type == "code_interpreter":
@@ -123,7 +126,7 @@ class EventHandler(AssistantEventHandler):
             for output in tool_call.code_interpreter.outputs:
                 if output.type == "logs":
                     output = f"### code interpreter\noutput:\n```\n{output.logs}\n```"
-                    with st.chat_message("Assistant"):
+                    with st.chat_message("Assistant", avatar=assistant_icon):
                         st.markdown(output, True)
                         st.session_state.chat_log.append(
                             {"name": "assistant", "msg": output}
@@ -132,7 +135,7 @@ class EventHandler(AssistantEventHandler):
             tool_call.type == "function"
             and self.current_run.status == "requires_action"
         ):
-            with st.chat_message("Assistant"):
+            with st.chat_message("Assistant", avatar=assistant_icon):
                 msg = f"### Function Calling: {tool_call.function.name}"
                 st.markdown(msg, True)
                 st.session_state.chat_log.append({"name": "assistant", "msg": msg})
@@ -226,7 +229,11 @@ def handle_uploaded_file(uploaded_file):
 
 def render_chat():
     for chat in st.session_state.chat_log:
-        with st.chat_message(chat["name"]):
+        if chat["name"] == "assistant":
+            theavatar = assistant_icon
+        else:
+            theavatar = user_icon
+        with st.chat_message(chat["name"], avatar=theavatar):
             st.markdown(chat["msg"], True)
 
 
@@ -292,7 +299,7 @@ def load_chat_screen(assistant_id, assistant_title):
         file = None
         if not st.session_state.just_started:
             render_chat()
-            with st.chat_message("user"):
+            with st.chat_message("user", avatar=user_icon):
                 st.markdown(user_msg, True)
             st.session_state.chat_log.append({"name": "user", "msg": user_msg})
             if uploaded_file is not None:

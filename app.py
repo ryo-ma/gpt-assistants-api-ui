@@ -257,9 +257,6 @@ def load_chat_screen(assistant_id, assistant_title):
             type=[
                 "txt",
                 "pdf",
-                "png",
-                "jpg",
-                "jpeg",
                 "csv",
                 "json",
                 "geojson",

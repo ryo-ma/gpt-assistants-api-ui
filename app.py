@@ -13,8 +13,10 @@ import streamlit_authenticator as stauth
 
 load_dotenv()
 
-assistant_icon = "🤖" # st.image('A2logo_neg_small.png')
+assistant_icon = "🤖" 
 user_icon = "😍"      # st.image('A2logo_neg_small.png')
+st.logo('a2bred_trans.png', link = None, icon_image = None)
+st.sidebar.markdown("*Sandkasse for utprøving av KI.*")
 
 # Define here is you want to use Azure or not (even in enviroment variables are available, you may not want to go that way)
 useAzure = False
@@ -29,7 +31,8 @@ def str_to_bool(str_input):
 
 # Load environment variables
 openai_api_key = os.environ.get("OPENAI_API_KEY")
-print ("Using OPENAI Key:" + openai_api_key[:7] + "..." + openai_api_key[-5:])
+if openai_api_key:
+    print ("Using OPENAI Key:" + openai_api_key[:7] + "..." + openai_api_key[-5:])
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
 enabled_file_upload_message = os.environ.get(
     "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
@@ -322,6 +325,8 @@ some_password = st.text_input("Enter secret password:", type="password")
 if not authenticate_password(some_password):
     st.error("Invalid Password. Access denied.")
     st.stop()
+else:
+    st.image("TOM_A-2.jpg", caption="Velkommen!")
 
 def main():
     # Check if multi-agent settings are defined

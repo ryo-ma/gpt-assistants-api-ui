@@ -326,7 +326,7 @@ if not authenticate_password(some_password):
     st.error("Invalid Password. Access denied.")
     st.stop()
 else:
-    st.image("TOM_A-2.jpg", caption="Velkommen!")
+    st.image("POT_A-2.jpg", caption="Velkommen!")
 
 def main():
     # Check if multi-agent settings are defined

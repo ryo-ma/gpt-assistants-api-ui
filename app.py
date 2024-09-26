@@ -13,6 +13,15 @@ import streamlit_authenticator as stauth
 
 load_dotenv()
 
+assistant_icon = "🤖" 
+user_icon = "😍"      # st.image('A2logo_neg_small.png')
+st.logo('a2bred_trans.png', link = None, icon_image = None)
+st.sidebar.markdown("*Sandkasse for utprøving av KI.*")
+
+# Define here is you want to use Azure or not (even in enviroment variables are available, you may not want to go that way)
+useAzure = False
+# Define the very first hidden message to the bot
+initial_hidden_message = "Hei!"
 
 def str_to_bool(str_input):
     if not isinstance(str_input, str):
@@ -22,6 +31,8 @@ def str_to_bool(str_input):
 
 # Load environment variables
 openai_api_key = os.environ.get("OPENAI_API_KEY")
+if openai_api_key:
+    print ("Using OPENAI Key:" + openai_api_key[:7] + "..." + openai_api_key[-5:])
 instructions = os.environ.get("RUN_INSTRUCTIONS", "")
 enabled_file_upload_message = os.environ.get(
     "ENABLED_FILE_UPLOAD_MESSAGE", "Upload a file"
@@ -43,7 +54,7 @@ if authentication_required:
         authenticator = None  # No authentication should be performed
 
 client = None
-if azure_openai_endpoint and azure_openai_key:
+if useAzure and azure_openai_endpoint and azure_openai_key:
     client = openai.AzureOpenAI(
         api_key=azure_openai_key,
         api_version="2024-05-01-preview",
@@ -61,7 +72,7 @@ class EventHandler(AssistantEventHandler):
     @override
     def on_text_created(self, text):
         st.session_state.current_message = ""
-        with st.chat_message("Assistant"):
+        with st.chat_message("Assistant", avatar=assistant_icon):
             st.session_state.current_markdown = st.empty()
 
     @override
@@ -85,13 +96,13 @@ class EventHandler(AssistantEventHandler):
     def on_tool_call_created(self, tool_call):
         if tool_call.type == "code_interpreter":
             st.session_state.current_tool_input = ""
-            with st.chat_message("Assistant"):
+            with st.chat_message("Assistant", avatar=assistant_icon):
                 st.session_state.current_tool_input_markdown = st.empty()
 
     @override
     def on_tool_call_delta(self, delta, snapshot):
         if 'current_tool_input_markdown' not in st.session_state:
-            with st.chat_message("Assistant"):
+            with st.chat_message("Assistant", avatar=assistant_icon):
                 st.session_state.current_tool_input_markdown = st.empty()
 
         if delta.type == "code_interpreter":
@@ -118,7 +129,7 @@ class EventHandler(AssistantEventHandler):
             for output in tool_call.code_interpreter.outputs:
                 if output.type == "logs":
                     output = f"### code interpreter\noutput:\n```\n{output.logs}\n```"
-                    with st.chat_message("Assistant"):
+                    with st.chat_message("Assistant", avatar=assistant_icon):
                         st.markdown(output, True)
                         st.session_state.chat_log.append(
                             {"name": "assistant", "msg": output}
@@ -127,7 +138,7 @@ class EventHandler(AssistantEventHandler):
             tool_call.type == "function"
             and self.current_run.status == "requires_action"
         ):
-            with st.chat_message("Assistant"):
+            with st.chat_message("Assistant", avatar=assistant_icon):
                 msg = f"### Function Calling: {tool_call.function.name}"
                 st.markdown(msg, True)
                 st.session_state.chat_log.append({"name": "assistant", "msg": msg})
@@ -188,9 +199,10 @@ def format_annotation(text):
 
         if file_citation := getattr(annotation, "file_citation", None):
             cited_file = client.files.retrieve(file_citation.file_id)
-            citations.append(
-                f"[{index}] {file_citation.quote} from {cited_file.filename}"
-            )
+            if hasattr(file_citation, 'quote'):
+                citations.append(
+                    f"[{index}] {file_citation.quote} from {cited_file.filename}"
+                )
         elif file_path := getattr(annotation, "file_path", None):
             link_tag = create_file_link(
                 annotation.text.split("/")[-1],
@@ -220,7 +232,11 @@ def handle_uploaded_file(uploaded_file):
 
 def render_chat():
     for chat in st.session_state.chat_log:
-        with st.chat_message(chat["name"]):
+        if chat["name"] == "assistant":
+            theavatar = assistant_icon
+        else:
+            theavatar = user_icon
+        with st.chat_message(chat["name"], avatar=theavatar):
             st.markdown(chat["msg"], True)
 
 
@@ -232,6 +248,9 @@ if "chat_log" not in st.session_state:
 
 if "in_progress" not in st.session_state:
     st.session_state.in_progress = False
+
+if "just_started" not in st.session_state:
+    st.session_state.just_started = True
 
 
 def disable_form():
@@ -248,6 +267,7 @@ def login():
 def reset_chat():
     st.session_state.chat_log = []
     st.session_state.in_progress = False
+    st.session_state.just_started = True
 
 
 def load_chat_screen(assistant_id, assistant_title):
@@ -272,15 +292,19 @@ def load_chat_screen(assistant_id, assistant_title):
     user_msg = st.chat_input(
         "Message", on_submit=disable_form, disabled=st.session_state.in_progress
     )
+    if st.session_state.just_started and not user_msg:
+        user_msg = initial_hidden_message
+    
     if user_msg:
-        render_chat()
-        with st.chat_message("user"):
-            st.markdown(user_msg, True)
-        st.session_state.chat_log.append({"name": "user", "msg": user_msg})
-
         file = None
-        if uploaded_file is not None:
-            file = handle_uploaded_file(uploaded_file)
+        if not st.session_state.just_started:
+            render_chat()
+            with st.chat_message("user", avatar=user_icon):
+                st.markdown(user_msg, True)
+            st.session_state.chat_log.append({"name": "user", "msg": user_msg})
+            if uploaded_file is not None:
+                file = handle_uploaded_file(uploaded_file)
+        st.session_state.just_started = False
         run_stream(user_msg, file, assistant_id)
         st.session_state.in_progress = False
         st.session_state.tool_call = None
@@ -288,6 +312,18 @@ def load_chat_screen(assistant_id, assistant_title):
 
     render_chat()
 
+def authenticate_password(some_password):
+    if some_password != os.environ.get("USER_PASSWORD", None):
+        return False
+    return True
+
+some_password = st.text_input("Enter secret password:", type="password")
+
+if not authenticate_password(some_password):
+    st.error("Invalid Password. Access denied.")
+    st.stop()
+else:
+    st.image("POT_A-2.jpg", caption="Velkommen!")
 
 def main():
     # Check if multi-agent settings are defined
